@@ -1,9 +1,18 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
-import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
+import { Canvas, useFrame, useThree, extend, ThreeElements } from '@react-three/fiber';
 import { Html, Text, Float, Environment, MeshTransmissionMaterial, useCursor, Sparkles, shaderMaterial } from '@react-three/drei';
 import { ArrowRight, X, Layers, Cpu, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
+
+// --- TYPE DEFINITIONS FOR R3F ELEMENTS ---
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {
+      stellarMaterial: any;
+    }
+  }
+}
 
 // --- SHADERS & MATERIALS ---
 
@@ -62,15 +71,14 @@ const StellarMaterial = shaderMaterial(
       
       // Moving Nebulae
       float n = snoise(uv * 3.0 + uTime * 0.1);
-      float n2 = snoise(uv * 6.0 - uTime * 0.05);
       
       vec3 color = mix(uColorStart, uColorEnd, n * 0.5 + 0.5);
       
-      // Stars
+      // Stars (Reduced Calculation)
       float starNoise = snoise(uv * 50.0);
       if (starNoise > 0.98) {
           float twinkle = sin(uTime * 5.0 + uv.x * 100.0) * 0.5 + 0.5;
-          color += vec3(twinkle);
+          color += vec3(twinkle * 0.5);
       }
       
       // Subtle vignette
@@ -157,7 +165,7 @@ const tagDescriptions: Record<string, string> = {
 
 // --- SUB COMPONENTS ---
 
-const Tag = ({ text }: { text: string }) => {
+const Tag: React.FC<{ text: string }> = ({ text }) => {
     const [hovered, setHovered] = useState(false);
     
     return (
@@ -201,7 +209,7 @@ const StellarBackground = () => {
 
     return (
         <mesh scale={[100, 100, 100]}>
-            <sphereGeometry args={[1, 64, 64]} />
+            <sphereGeometry args={[1, 32, 32]} />
             {/* @ts-ignore */}
             <stellarMaterial ref={materialRef} side={THREE.BackSide} />
         </mesh>
@@ -209,21 +217,21 @@ const StellarBackground = () => {
 }
 
 const LiquidCore = ({ color, isActive }: { color: string, isActive: boolean }) => {
-    // Realistic Water Shader Setup using Transmission
+    // Optimized Geometry
     return (
         <mesh position={[0, 0, 0]}>
-            <sphereGeometry args={[0.65, 64, 64]} />
+            <sphereGeometry args={[0.65, 32, 32]} />
             <MeshTransmissionMaterial
                 background={new THREE.Color(color)}
                 backside
-                samples={4}
+                samples={4} // Reduced from 6/8
                 thickness={0.5}
                 roughness={0}
                 transmission={1}
-                ior={1.33} // Water IOR
+                ior={1.33} 
                 chromaticAberration={0.02}
                 anisotropy={0.2}
-                distortion={isActive ? 1.2 : 0.8} // Dynamic ripples
+                distortion={isActive ? 1.0 : 0.5} 
                 distortionScale={0.4}
                 temporalDistortion={0.2}
                 color={color}
@@ -315,22 +323,22 @@ const Card = ({ project, index, activeIndex, setActiveIndex, setSelectedProject,
                     onPointerOut={() => setHover(false)}
                 >
                     <boxGeometry args={[2.5, 3.5, 0.4]} /> 
+                    {/* OPTIMIZED MATERIAL */}
                     <MeshTransmissionMaterial 
                         backside
-                        samples={12} // Increased for realism
-                        thickness={1.2} // Thicker glass for deep refraction
-                        chromaticAberration={0.08} // Stronger prism effect
-                        anisotropy={0.3} // Brushed internal structure
-                        distortion={0.3} // Subtle liquid distortion in glass
+                        samples={6} // Reduced from 12 for performance
+                        thickness={1.2} 
+                        chromaticAberration={0.08} 
+                        anisotropy={0.3} 
+                        distortion={0.3} 
                         distortionScale={0.3}
                         temporalDistortion={0.1}
                         iridescence={1}
                         iridescenceIOR={1.3}
-                        ior={1.7} // High IOR (Sapphire/Crystal)
-                        roughness={0.02} // Extremely smooth
+                        ior={1.7} 
+                        roughness={0.02} 
                         metalness={0.1}
                         color={isActive ? "#ffffff" : "#f0f0f0"}
-                        // Emissive for the edge glow
                         emissive={project.color}
                         emissiveIntensity={isThisAnimating ? 0.8 : (isActive ? 0.1 : 0)}
                         toneMapped={true}
@@ -469,15 +477,15 @@ export const Portfolio3D = () => {
             
             {/* UI Overlay: Header */}
             <div className="absolute top-10 left-0 w-full text-center px-6 z-30 pointer-events-none">
-                <span className="text-[#ccff00] font-mono text-xs uppercase tracking-[0.3em] block mb-4">/ WebGL Kernel</span>
+                <span className="text-[#ccff00] font-mono text-xs uppercase tracking-[0.3em] block mb-4">/ Interactive Showcase</span>
                 <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tighter font-manrope">
-                    DANVERSE <span className="text-zinc-600">OS</span>
+                    PROJECT <span className="text-zinc-600">ARCHIVE</span>
                 </h2>
             </div>
 
-            {/* R3F Canvas */}
+            {/* R3F Canvas - Optimized settings */}
             <div className="absolute inset-0 z-10">
-                <Canvas camera={{ position: [0, 0, 8], fov: 35 }} dpr={[1, 2]}>
+                <Canvas camera={{ position: [0, 0, 8], fov: 35 }} dpr={[1, 1.5]} gl={{ powerPreference: 'high-performance', antialias: false }}>
                     <fog attach="fog" args={['#050505', 5, 25]} />
                     
                     {/* 1. Stellarize Background */}
@@ -490,7 +498,7 @@ export const Portfolio3D = () => {
                     <spotLight position={[0, 10, 0]} intensity={2} angle={0.5} penumbra={1} color="white" />
                     
                     {/* Extra Particles for depth */}
-                    <Sparkles count={150} scale={12} size={3} speed={0.4} opacity={0.5} color="#ccff00" />
+                    <Sparkles count={80} scale={12} size={3} speed={0.4} opacity={0.5} color="#ccff00" />
                     
                     <CarouselRig activeIndex={activeIndex} count={ecosystemNodes.length}>
                         {ecosystemNodes.map((project, index) => (

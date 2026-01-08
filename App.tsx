@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Features } from './components/Features';
@@ -7,9 +7,20 @@ import { MobileSuite } from './components/MobileSuite';
 import { Testimonials } from './components/Testimonials';
 import { ContactForm } from './components/ContactForm';
 import { Footer } from './components/Footer';
-import { Canvas, useFrame, extend } from '@react-three/fiber';
+import { NavWidgets } from './components/NavWidgets';
+import { CustomCursor } from './components/CustomCursor'; // Import Cursor
+import { Canvas, useFrame, extend, ThreeElements } from '@react-three/fiber';
 import { shaderMaterial, Stars } from '@react-three/drei';
 import * as THREE from 'three';
+
+// --- TYPE DEFINITIONS FOR R3F ELEMENTS ---
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {
+      cosmicBackgroundMaterial: any;
+    }
+  }
+}
 
 // --- GLOBAL SHADER MATERIAL ---
 const CosmicBackgroundMaterial = shaderMaterial(
@@ -74,10 +85,9 @@ const CosmicBackgroundMaterial = shaderMaterial(
       // Generate multiple layers of noise
       float n1 = snoise(uv * 2.0 + vec2(time * 0.1, time * 0.2));
       float n2 = snoise(uv * 4.0 - vec2(time * 0.2, time * 0.1));
-      float n3 = snoise(uv * 8.0 + vec2(sin(time), cos(time)) * 0.05);
       
       // Mix noise
-      float finalNoise = (n1 * 0.5 + n2 * 0.3 + n3 * 0.2);
+      float finalNoise = (n1 * 0.5 + n2 * 0.3);
       
       // Pulse intensity
       float pulse = sin(uTime * 0.5) * 0.1 + 0.9;
@@ -114,7 +124,7 @@ const LivingBackground = () => {
                 {/* @ts-ignore */}
                 <cosmicBackgroundMaterial ref={materialRef} />
             </mesh>
-            <Stars radius={50} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
+            <Stars radius={50} depth={50} count={1000} factor={4} saturation={0} fade speed={1} />
         </>
     );
 };
@@ -135,7 +145,22 @@ const GlobalStyles = () => (
 
     body {
       background-color: var(--deep-void);
-      cursor: crosshair;
+      /* Cursor handled by CustomCursor component now */
+    }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #ccff00;
     }
 
     @keyframes fadeSlideIn {
@@ -171,6 +196,8 @@ const GlobalStyles = () => (
 );
 
 const App: React.FC = () => {
+  const [activeWidget, setActiveWidget] = useState<string | null>(null);
+
   useEffect(() => {
     // Robust Scroll Animation Observer
     const observerOptions = {
@@ -196,13 +223,33 @@ const App: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
+  const handleOpenWidget = (widget: string) => {
+      if (activeWidget === widget) {
+          setActiveWidget(null);
+      } else {
+          setActiveWidget(widget);
+      }
+  };
+
+  const handleCloseWidget = () => {
+      setActiveWidget(null);
+  };
+
   return (
     <div className="relative min-h-screen bg-black text-white font-sans overflow-x-hidden selection:bg-[#ccff00] selection:text-black">
       <GlobalStyles />
       
+      {/* Initialize Quantum Cursor */}
+      <CustomCursor />
+
+      {/* Navigation & Widgets */}
+      <Navbar activeWidget={activeWidget} onOpenWidget={handleOpenWidget} />
+      <NavWidgets activeWidget={activeWidget} onClose={handleCloseWidget} />
+
       {/* --- GLOBAL LIVING BACKGROUND --- */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-          <Canvas camera={{ position: [0, 0, 1] }} dpr={[1, 1.5]}>
+          {/* OPTIMIZED: Reduced DPR and turned off antialias for background */}
+          <Canvas camera={{ position: [0, 0, 1] }} dpr={[1, 1.25]} gl={{ antialias: false, powerPreference: 'default' }}>
               <LivingBackground />
           </Canvas>
           {/* Subtle noise overlay */}
@@ -212,8 +259,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Content Wrapper */}
-      <div className="relative z-10">
-          <Navbar />
+      <div className={`relative z-10 transition-opacity duration-500 ${activeWidget ? 'opacity-30 blur-sm pointer-events-none' : 'opacity-100'}`}>
           <Hero />
           <Features />
           <Portfolio3D />

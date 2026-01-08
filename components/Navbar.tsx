@@ -1,7 +1,14 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  activeWidget: string | null;
+  onOpenWidget: (widget: string) => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ activeWidget, onOpenWidget }) => {
+  const menuItems = ['Work', 'Expertise', 'Studio', 'Insights'];
+
   return (
     <div className="fixed flex w-full z-50 pt-8 px-6 top-0 left-0 justify-center">
         <nav className="flex w-full max-w-[1400px] items-center justify-between">
@@ -14,11 +21,20 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-1 bg-black/50 backdrop-blur-md rounded-full px-2 py-2 border border-white/10">
-                {['Work', 'Expertise', 'Studio', 'Insights'].map((item) => (
-                    <a key={item} href="#" className="relative px-6 py-2 rounded-full text-sm font-medium text-zinc-400 hover:text-black hover:bg-[#ccff00] transition-all duration-300 font-geist uppercase tracking-wide">
+            <div className="hidden md:flex items-center gap-1 bg-black/50 backdrop-blur-md rounded-full px-2 py-2 border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                {menuItems.map((item) => (
+                    <button 
+                        key={item} 
+                        onClick={() => onOpenWidget(activeWidget === item ? '' : item)}
+                        className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 font-geist uppercase tracking-wide
+                            ${activeWidget === item 
+                                ? 'bg-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.4)]' 
+                                : 'text-zinc-400 hover:text-white hover:bg-white/10'
+                            }
+                        `}
+                    >
                         {item}
-                    </a>
+                    </button>
                 ))}
             </div>
 

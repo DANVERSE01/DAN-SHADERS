@@ -1,8 +1,15 @@
 import React, { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, ThreeElements } from '@react-three/fiber';
 import { Float, MeshDistortMaterial, MeshTransmissionMaterial, Sparkles, CameraShake, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { ArrowDown } from 'lucide-react';
+
+// --- TYPE DEFINITIONS FOR R3F ELEMENTS ---
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {}
+  }
+}
 
 // --- 3D SCENE COMPONENTS ---
 
@@ -27,28 +34,29 @@ const AlchemyCore = () => {
         <group ref={meshRef}>
             {/* The Liquid Inner Core */}
             <mesh scale={0.8}>
-                <sphereGeometry args={[1, 64, 64]} />
+                <sphereGeometry args={[1, 32, 32]} />
                 <MeshDistortMaterial 
                     color="#ccff00" 
                     envMapIntensity={1} 
                     clearcoat={1} 
                     clearcoatRoughness={0} 
                     metalness={0.1} 
-                    distort={0.6} 
+                    distort={0.4} 
                     speed={2} 
                 />
             </mesh>
 
             {/* The Crystalline Shell */}
             <mesh scale={1.4}>
-                <icosahedronGeometry args={[1, 15]} />
+                <icosahedronGeometry args={[1, 4]} />
+                {/* OPTIMIZED MATERIAL: Reduced samples and resolution for performance */}
                 <MeshTransmissionMaterial 
                     backside
-                    samples={10}
-                    resolution={1024}
+                    samples={4} 
+                    resolution={512}
                     thickness={0.5}
                     roughness={0}
-                    anisotropy={1}
+                    anisotropy={0.5}
                     chromaticAberration={0.06}
                     color="#e2e8f0"
                     transmission={1}
@@ -74,18 +82,17 @@ const Scene = () => {
                 <AlchemyCore />
             </Float>
 
-            <Sparkles count={200} scale={10} size={2} speed={0.4} opacity={0.5} color="#ccff00" />
+            <Sparkles count={100} scale={10} size={2} speed={0.4} opacity={0.5} color="#ccff00" />
             
             <CameraShake 
-                maxYaw={0.05} 
-                maxPitch={0.05} 
-                maxRoll={0.05} 
+                maxYaw={0.02} 
+                maxPitch={0.02} 
+                maxRoll={0.02} 
                 yawFrequency={0.1} 
                 pitchFrequency={0.1} 
                 rollFrequency={0.1} 
-                intensity={1} 
+                intensity={0.5} 
                 decay={false} 
-                decayRate={0.65} 
             />
         </>
     );
@@ -99,7 +106,7 @@ export const Hero: React.FC = () => {
         
         {/* 3D Canvas Background - Full Immersion */}
         <div className="absolute inset-0 z-0">
-             <Canvas camera={{ position: [0, 0, 6], fov: 45 }} dpr={[1, 2]}>
+             <Canvas camera={{ position: [0, 0, 6], fov: 45 }} dpr={[1, 1.5]} gl={{ powerPreference: "high-performance", antialias: false }}>
                  <Scene />
              </Canvas>
         </div>
@@ -109,12 +116,7 @@ export const Hero: React.FC = () => {
 
         {/* Main Content */}
         <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-4 pointer-events-none">
-            <div className="animate-on-scroll overflow-hidden mb-8 pointer-events-auto">
-                 <span className="inline-block text-[#ccff00] font-mono text-xs tracking-[0.4em] uppercase border border-[#ccff00]/20 bg-black/30 backdrop-blur-md px-6 py-3 rounded-full hover:bg-[#ccff00] hover:text-black transition-all duration-300 cursor-default">
-                    Est. 2030 — Global Design House
-                 </span>
-            </div>
-
+            
             <h1 className="animate-on-scroll relative text-[13vw] leading-[0.85] font-bold text-white tracking-tighter font-manrope mix-blend-difference mb-8 select-none">
                 VISUAL
                 <br />

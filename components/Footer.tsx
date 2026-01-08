@@ -9,19 +9,19 @@ export const Footer: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-start mb-24">
                 <div className="mb-12 md:mb-0">
                     <h3 className="text-4xl font-bold text-white tracking-tighter font-manrope mb-4">DANVERSE<span className="text-[#ccff00]">.STUDIO</span></h3>
-                    <p className="text-zinc-500 text-sm font-mono max-w-xs">
-                        Tokyo — New York — London<br/>
+                    <p className="text-zinc-500 text-sm font-mono max-w-xs leading-relaxed">
+                        Global Digital Design House.<br/>
                         Creating digital monuments since 2030.
                     </p>
                 </div>
 
-                <div className="flex gap-20">
+                <div className="flex flex-wrap gap-20">
                     <div className="flex flex-col gap-6">
                         <h4 className="text-xs font-bold text-white uppercase tracking-widest">Sitemap</h4>
                         <a href="#" className="text-zinc-400 hover:text-[#ccff00] transition-colors">Work</a>
                         <a href="#" className="text-zinc-400 hover:text-[#ccff00] transition-colors">Studio</a>
-                        <a href="#" className="text-zinc-400 hover:text-[#ccff00] transition-colors">News</a>
-                        <a href="#" className="text-zinc-400 hover:text-[#ccff00] transition-colors">Contact</a>
+                        <a href="#" className="text-zinc-400 hover:text-[#ccff00] transition-colors">Insights</a>
+                        <a href="#contact" className="text-zinc-400 hover:text-[#ccff00] transition-colors">Contact</a>
                     </div>
                     <div className="flex flex-col gap-6">
                         <h4 className="text-xs font-bold text-white uppercase tracking-widest">Social</h4>
