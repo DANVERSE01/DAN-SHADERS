@@ -64,6 +64,9 @@ export const CustomCursor: React.FC = () => {
     };
   }, [mouseX, mouseY]);
 
+  const MotionDiv = motion.div as any;
+  const MotionSpan = motion.span as any;
+
   return (
     <>
       <style>{`
@@ -75,18 +78,18 @@ export const CustomCursor: React.FC = () => {
       <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden">
         
         {/* 1. SMOKE TRAIL (Performance Optimized: Single Element) */}
-        <motion.div
+        <MotionDiv
             style={{ 
                 x: trailX, 
                 y: trailY,
                 translateX: '-50%',
                 translateY: '-50%'
             }}
-            className="absolute w-24 h-24 rounded-full bg-[#ccff00]/10 blur-[40px] mix-blend-screen"
+            className="absolute w-24 h-24 rounded-full bg-[var(--primary-500)]/10 blur-[40px] mix-blend-screen"
         />
 
         {/* 2. THE AURA (Glass Effect) */}
-        <motion.div
+        <MotionDiv
             style={{ 
                 x: auraX, 
                 y: auraY,
@@ -98,7 +101,7 @@ export const CustomCursor: React.FC = () => {
                 height: isHovering ? 60 : 32,
                 scale: isClicking ? 0.9 : 1,
                 backgroundColor: isHovering ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.02)',
-                borderColor: isHovering ? 'rgba(204, 255, 0, 0.3)' : 'rgba(255, 255, 255, 0.1)'
+                borderColor: isHovering ? 'var(--primary-500)' : 'rgba(255, 255, 255, 0.1)'
             }}
             transition={{ duration: 0.2 }}
             className="absolute rounded-full border backdrop-blur-[1px] flex items-center justify-center overflow-hidden"
@@ -106,20 +109,20 @@ export const CustomCursor: React.FC = () => {
             {/* Text Label */}
             <AnimatePresence>
                 {hoverText && (
-                    <motion.span 
+                    <MotionSpan 
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        className="text-[8px] font-mono text-[#ccff00] uppercase tracking-widest font-bold absolute whitespace-nowrap"
+                        className="text-[8px] font-mono text-[var(--primary-500)] uppercase tracking-widest font-bold absolute whitespace-nowrap"
                     >
                         {hoverText}
-                    </motion.span>
+                    </MotionSpan>
                 )}
             </AnimatePresence>
-        </motion.div>
+        </MotionDiv>
 
         {/* 3. THE CORE (Precision) */}
-        <motion.div
+        <MotionDiv
             style={{ 
                 x: coreX, 
                 y: coreY,
@@ -129,17 +132,17 @@ export const CustomCursor: React.FC = () => {
             animate={{
                 scale: isHovering ? 0.2 : 1 
             }}
-            className="absolute w-1.5 h-1.5 bg-[#ccff00] rounded-full shadow-[0_0_10px_#ccff00]"
+            className="absolute w-1.5 h-1.5 bg-[var(--primary-500)] rounded-full shadow-[0_0_10px_var(--primary-500)]"
         />
 
         {/* 4. Crosshair Lines (Subtle) */}
-        <motion.div 
+        <MotionDiv 
             style={{ x: coreX, y: coreY, translateX: '-50%', translateY: '-50%' }}
             className="absolute w-full h-full flex items-center justify-center opacity-20"
         >
-             <div className="absolute w-[40px] h-[1px] bg-[#ccff00]" />
-             <div className="absolute w-[1px] h-[40px] bg-[#ccff00]" />
-        </motion.div>
+             <div className="absolute w-[40px] h-[1px] bg-[var(--primary-500)]" />
+             <div className="absolute w-[1px] h-[40px] bg-[var(--primary-500)]" />
+        </MotionDiv>
 
       </div>
     </>
